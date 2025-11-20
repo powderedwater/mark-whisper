@@ -26,8 +26,8 @@ jobs:
           
       - name: Build with PyInstaller
         run: |
-          # Build one-directory mode so it's easier to bundle ffmpeg
-          pyinstaller --noconfirm --onedir --windowed --name "WhisperTranscriber" --icon=NONE local_whisper_app.py
+          # --collect-all whisper: REQUIRED to grab mel_filters.npz and other assets
+          pyinstaller --noconfirm --onedir --windowed --name "WhisperTranscriber" --icon=NONE --collect-all whisper local_whisper_app.py
           
           # Copy ffmpeg into the dist folder so it ships with the app
           Copy-Item "ffmpeg.exe" -Destination "dist\WhisperTranscriber\"
