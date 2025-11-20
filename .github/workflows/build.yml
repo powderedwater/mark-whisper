@@ -1,0 +1,38 @@
+name: Build Whisper App
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' 
+          
+      - name: Install Dependencies
+        run: |
+          pip install torch torchvision torchaudio --index-url [https://download.pytorch.org/whl/cu118](https://download.pytorch.org/whl/cu118)
+          pip install openai-whisper pyinstaller
+          
+      - name: Download FFmpeg
+        run: |
+          Invoke-WebRequest -Uri "[https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip](https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip)" -OutFile "ffmpeg.zip"
+          Expand-Archive ffmpeg.zip -DestinationPath ffmpeg_temp
+          Move-Item -Path "ffmpeg_temp\ffmpeg-master-latest-win64-gpl\bin\ffmpeg.exe" -Destination .
+          
+      - name: Build with PyInstaller
+        run: |
+          # Build one-directory mode so it's easier to bundle ffmpeg
+          pyinstaller --noconfirm --onedir --windowed --name "WhisperTranscriber" --icon=NONE local_whisper_app.py
+          
+          # Copy ffmpeg into the dist folder so it ships with the app
+          Copy-Item "ffmpeg.exe" -Destination "dist\WhisperTranscriber\"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WhisperTranscriber_Windows
+          path: dist/WhisperTranscriber
