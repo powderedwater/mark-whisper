@@ -14,8 +14,9 @@ jobs:
           
       - name: Install Dependencies
         run: |
+          # Add windnd for drag and drop
           pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-          pip install openai-whisper pyinstaller
+          pip install openai-whisper pyinstaller windnd
           
       - name: Download FFmpeg
         run: |
